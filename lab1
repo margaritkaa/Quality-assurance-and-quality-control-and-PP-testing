@@ -1,0 +1,70 @@
+# Імпорт необхідних бібліотек
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_iris
+
+# Завантаження датасету Iris
+iris = load_iris()
+data = iris.data
+target = iris.target
+target_names = iris.target_names
+
+# Створення DataFrame для зручності
+df = pd.DataFrame(data, columns=iris.feature_names)
+df['class'] = target
+
+# Виведення перших 5 рядків датасету
+print(df.head())
+
+# Функція для обчислення евклідової відстані
+def euclidean_distance(point1, point2):
+    return np.sqrt(np.sum((point1 - point2) ** 2))
+
+# Функція для обчислення манхеттенської відстані
+def manhattan_distance(point1, point2):
+    return np.sum(np.abs(point1 - point2))
+
+# Функція для обчислення відстані Мінковського (р=3)
+def minkowski_distance(point1, point2, p=3):
+    return np.power(np.sum(np.abs(point1 - point2) ** p), 1/p)
+
+# Функція для класифікації об'єкта на основі методу найближчого сусіда
+def classify(unknown, dataset, labels, method='euclidean'):
+    distances = []
+    for i in range(len(dataset)):
+        if method == 'euclidean':
+            dist = euclidean_distance(unknown, dataset[i])
+        elif method == 'manhattan':
+            dist = manhattan_distance(unknown, dataset[i])
+        elif method == 'minkowski':
+            dist = minkowski_distance(unknown, dataset[i])
+        distances.append((dist, labels[i]))
+
+    distances = sorted(distances, key=lambda x: x[0], reverse=True)  
+
+    return distances[0][1]  # Повертає клас об'єкта, який знаходиться найближче
+
+# Вибір об'єкта для класифікації
+unknown = np.array([5.1, 3.5, 1.4, 0.2])  # Наприклад, нова квітка
+
+# Класифікація нової квітки
+predicted_class = classify(unknown, data, target, method='euclidean')
+print(f"Клас за евклідовою відстанню: {target_names[predicted_class]}")
+
+# Візуалізація
+plt.figure(figsize=(8, 6))
+colors = ['red', 'green', 'blue']
+for i, color in enumerate(colors):
+    subset = df[df['class'] == i]
+    plt.scatter(subset['sepal length (cm)'], subset['sepal width (cm)'], 
+                color=color, label=target_names[i])
+
+# Відображення невідомого об'єкта
+plt.scatter(unknown[0], unknown[1], color='black', label='Unknown', s=100)
+plt.xlabel('Sepal Length')
+plt.ylabel('Sepal Width')
+plt.legend()
+plt.title('Класифікація квітки за допомогою Евклідової відстані')
+plt.grid(True)
+plt.show()
