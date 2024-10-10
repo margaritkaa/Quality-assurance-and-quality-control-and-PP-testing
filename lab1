@@ -41,7 +41,7 @@ def classify(unknown, dataset, labels, method='euclidean'):
             dist = minkowski_distance(unknown, dataset[i])
         distances.append((dist, labels[i]))
 
-    distances = sorted(distances, key=lambda x: x[0])  
+    distances = sorted(distances, key=lambda x: x[0], reverse=True)  
 
     return distances[0][1]  # Повертає клас об'єкта, який знаходиться найближче
 
